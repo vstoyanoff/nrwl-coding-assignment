@@ -1,5 +1,5 @@
-import { Observable, of, throwError } from "rxjs";
-import { delay, tap } from "rxjs/operators";
+import { Observable, of, throwError } from 'rxjs';
+import { delay, tap } from 'rxjs/operators';
 
 /**
  * This service acts as a mock back-end.
@@ -23,32 +23,22 @@ function randomDelay() {
 }
 
 export class BackendService {
-  storedTickets: Ticket[] = [
-    {
-      id: 0,
-      description: "Install a monitor arm",
-      assigneeId: 111,
-      completed: false
-    },
-    {
-      id: 1,
-      description: "Move the desk to the new location",
-      assigneeId: 111,
-      completed: false
-    }
-  ];
+  storedTickets: Ticket[] = [];
 
-  storedUsers: User[] = [{ id: 111, name: "Victor" }];
+  storedUsers: User[] = [];
 
   lastId = 1;
 
   private findTicketById = (id: number) => {
-    const found = this.storedTickets.find(ticket => ticket.id === +id);
+    const found = this.storedTickets.find((ticket) => ticket.id === +id);
     if (found) return found;
     throw new Error(`Ticket (id=${id}) not found`);
   };
-  private findUserById = (id: number) =>
-    this.storedUsers.find(user => user.id === +id);
+  private findUserById = (id: number) => {
+    const found = this.storedUsers.find((user) => user.id === +id);
+    if (found) return found;
+    throw new Error(`User (id=${id}) not found`);
+  };
 
   tickets() {
     return of(this.storedTickets).pipe(delay(randomDelay()));
@@ -71,12 +61,12 @@ export class BackendService {
       id: ++this.lastId,
       description: payload.description,
       assigneeId: null,
-      completed: false
+      completed: false,
     };
 
     return of(newTicket).pipe(
       delay(randomDelay()),
-      tap((ticket: Ticket) => this.storedTickets.push(ticket))
+      tap((ticket: Ticket) => this.storedTickets.push(ticket)),
     );
   }
 
@@ -89,11 +79,11 @@ export class BackendService {
         delay(randomDelay()),
         tap((ticket: Ticket) => {
           ticket.assigneeId = +userId;
-        })
+        }),
       );
     }
 
-    return throwError(new Error("ticket or user not found"));
+    return throwError(new Error('ticket or user not found'));
   }
 
   complete(ticketId: number, completed: boolean) {
@@ -102,11 +92,11 @@ export class BackendService {
       return of(foundTicket).pipe(
         delay(randomDelay()),
         tap((ticket: Ticket) => {
-          ticket.completed = true;
-        })
+          ticket.completed = completed;
+        }),
       );
     }
 
-    return throwError(new Error("ticket not found"));
+    return throwError(new Error('ticket not found'));
   }
 }
