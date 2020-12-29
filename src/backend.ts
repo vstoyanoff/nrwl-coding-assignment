@@ -25,9 +25,12 @@ function randomDelay() {
 export class BackendService {
   storedTickets: Ticket[] = [];
 
-  storedUsers: User[] = [];
+  storedUsers: User[] = [
+    { id: 1, name: 'John Doe' },
+    { id: 2, name: 'Jane Doe' },
+  ];
 
-  lastId = 1;
+  lastId = 0;
 
   private findTicketById = (id: number) => {
     const found = this.storedTickets.find((ticket) => ticket.id === +id);
@@ -44,9 +47,9 @@ export class BackendService {
     return of(this.storedTickets).pipe(delay(randomDelay()));
   }
 
-  ticket(id: number): Observable<Ticket> {
+  ticket = (id: number): Observable<Ticket> => {
     return of(this.findTicketById(id)).pipe(delay(randomDelay()));
-  }
+  };
 
   users(): Observable<User[]> {
     return of(this.storedUsers).pipe(delay(randomDelay()));
@@ -70,7 +73,7 @@ export class BackendService {
     );
   };
 
-  assign(ticketId: number, userId: number) {
+  assign = (ticketId: number, userId: number) => {
     const foundTicket = this.findTicketById(+ticketId);
     const user = this.findUserById(+userId);
 
@@ -84,9 +87,9 @@ export class BackendService {
     }
 
     return throwError(new Error('ticket or user not found'));
-  }
+  };
 
-  complete(ticketId: number, completed: boolean) {
+  complete = (ticketId: number, completed: boolean) => {
     const foundTicket = this.findTicketById(+ticketId);
     if (foundTicket) {
       return of(foundTicket).pipe(
@@ -98,5 +101,5 @@ export class BackendService {
     }
 
     return throwError(new Error('ticket not found'));
-  }
+  };
 }
