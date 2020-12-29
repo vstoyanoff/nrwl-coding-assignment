@@ -40,7 +40,7 @@ export class BackendService {
     throw new Error(`User (id=${id}) not found`);
   };
 
-  tickets() {
+  tickets(): Observable<Ticket[]> {
     return of(this.storedTickets).pipe(delay(randomDelay()));
   }
 
@@ -48,15 +48,15 @@ export class BackendService {
     return of(this.findTicketById(id)).pipe(delay(randomDelay()));
   }
 
-  users() {
+  users(): Observable<User[]> {
     return of(this.storedUsers).pipe(delay(randomDelay()));
   }
 
-  user(id: number) {
+  user(id: number): Observable<User> {
     return of(this.findUserById(id)).pipe(delay(randomDelay()));
   }
 
-  newTicket(payload: { description: string }) {
+  newTicket = (payload: { description: string }) => {
     const newTicket: Ticket = {
       id: ++this.lastId,
       description: payload.description,
@@ -68,7 +68,7 @@ export class BackendService {
       delay(randomDelay()),
       tap((ticket: Ticket) => this.storedTickets.push(ticket)),
     );
-  }
+  };
 
   assign(ticketId: number, userId: number) {
     const foundTicket = this.findTicketById(+ticketId);
