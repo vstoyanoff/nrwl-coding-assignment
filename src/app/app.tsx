@@ -1,44 +1,62 @@
-import React, { useEffect, useState } from "react";
-import "./app.css";
-import { BackendService, Ticket } from "../backend";
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BackendService, Ticket as TicketProps, User } from '../backend';
+
+//Components
+import { Container } from '@material-ui/core';
+
+//Pages
+import Homepage from './pages/homepage';
+import TicketPage from './pages/ticket-page';
 
 interface AppProps {
   backend: BackendService;
 }
 
 const App = ({ backend }: AppProps) => {
-  const [tickets, setTickets] = useState([] as Ticket[]);
+  const [tickets, setTickets] = useState([] as TicketProps[]);
+  const [users, setUsers] = useState([] as User[]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // The backend returns observables, but you can convert to promises if
-  // that is easier to work with. It's up to you.
   useEffect(() => {
-    const fetchData = async () => {
-      const result = await backend.tickets().toPromise();
+    const ticketsSub = backend.tickets().subscribe((result) => {
       setTickets(result);
-    };
-    fetchData();
+      setLoading(false);
+    });
+    const usersSub = backend.users().subscribe((result) => {
+      setUsers(result);
+    });
 
-    // Example of use observables directly
-    // const sub = backend.tickets().subscribe(result => {
-    //   setTickets(result);
-    // });
-    // return () => sub.unsubscribe(); // clean up subscription
+    return () => {
+      ticketsSub.unsubscribe();
+      usersSub.unsubscribe();
+    };
   }, [backend]);
 
   return (
-    <div className="app">
-      <h2>Tickets</h2>
-      {tickets ? (
-        <ul>
-          {tickets.map(t => (
-            <li key={t.id}>
-              Ticket: {t.id}, {t.description}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <span>...</span>
-      )}
+    <div className='app'>
+      <Router>
+        <Container maxWidth='sm'>
+          <Switch>
+            <Route exact path='/'>
+              <Homepage
+                tickets={tickets}
+                loading={loading}
+                addNew={backend.newTicket}
+              />
+            </Route>
+
+            <Route path='/ticket/:ticketId'>
+              <TicketPage
+                users={users}
+                getTicket={backend.ticket}
+                assign={backend.assign}
+                complete={backend.complete}
+              />
+            </Route>
+          </Switch>
+        </Container>
+      </Router>
     </div>
   );
 };
